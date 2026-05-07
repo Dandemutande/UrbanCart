@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - test
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -17,8 +18,8 @@ concurrency:
 jobs:
   deploy-test:
     environment:
-      name: test
-      url: https://dandemutande.github.io/urbancart-test/
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     runs-on: ubuntu-latest
 
@@ -26,10 +27,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
       - name: Prepare test build
         run: |
+          rm -rf public
           mkdir public
           cp -r Website/* public/
+          ls -la public
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -37,4 +43,5 @@ jobs:
           path: public
 
       - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
